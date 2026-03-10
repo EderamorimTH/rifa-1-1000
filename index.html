@@ -1,223 +1,264 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Rifa 1 a 1000</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rifa 1 a 1000 - Caixa de Litrão</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 
-<style>
+    <!-- Firebase Compat Mode (mais simples, evita erros de ref/dbRef) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-database-compat.js"></script>
 
-body{
-font-family:Arial;
-background:#111;
-color:white;
-text-align:center;
-}
-
-h1{
-color:#00ff88;
-}
-
-.grid{
-display:grid;
-grid-template-columns:repeat(10,1fr);
-gap:6px;
-max-width:600px;
-margin:auto;
-}
-
-.numero{
-background:#00cc66;
-padding:10px;
-cursor:pointer;
-border-radius:6px;
-font-weight:bold;
-}
-
-.numero:hover{
-background:#00ff88;
-}
-
-.selecionado{
-background:#0066ff;
-}
-
-.box{
-background:#222;
-padding:20px;
-margin-top:20px;
-border-radius:10px;
-max-width:600px;
-margin:auto;
-}
-
-input{
-width:90%;
-padding:10px;
-margin:6px;
-border-radius:6px;
-border:none;
-}
-
-button{
-background:#00cc66;
-border:none;
-padding:12px 20px;
-font-size:16px;
-border-radius:8px;
-cursor:pointer;
-}
-
-</style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; }
+        .number { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .number:hover { transform: scale(1.08); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2); }
+        .available { background: linear-gradient(135deg, #10b981, #34d399); color: #064e3b; border: 3px solid #10b981; }
+        .reserved { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #92400e; border: 3px solid #d97706; animation: pulse 2s infinite; }
+        .sold { background: linear-gradient(135deg, #64748b, #475569); color: #f1f5f9; border: 3px solid #475569; opacity: 0.85; }
+        .selected { box-shadow: 0 0 0 6px #3b82f6; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .grid-container { scrollbar-width: thin; scrollbar-color: #10b981 #f1f5f9; }
+    </style>
 </head>
-
-<body>
-
-<h1>RIFA 1 A 1000</h1>
-
-<p>
-PRÊMIO: 1 Caixa de Litrão<br>
-Valor por número: R$1
-</p>
-
-<div class="box">
-
-<h3>COMO PARTICIPAR</h3>
-
-<p>
-1 - Clique nos números que você quer.<br>
-2 - Os números escolhidos vão aparecer abaixo automaticamente.<br>
-3 - Digite seu nome e telefone.<br>
-4 - Clique em ENVIAR PELO WHATSAPP.<br>
-5 - Faça o pagamento do Pix e envie o comprovante.
-</p>
-
-</div>
-
-
-<div class="box">
-
-<h3>ESCOLHA SEUS NÚMEROS</h3>
-
-<div id="grid" class="grid"></div>
-
-</div>
-
-
-<div class="box">
-
-<h3>SEUS NÚMEROS</h3>
-
-<p id="numerosEscolhidos">Nenhum número selecionado</p>
-
-<p>
-Valor total: R$
-<span id="valor">0</span>
-</p>
-
-<input id="nome" placeholder="Digite seu nome">
-
-<input id="telefone" placeholder="Digite seu telefone">
-
-<br><br>
-
-<button onclick="enviarWhats()">ENVIAR PELO WHATSAPP</button>
-
-</div>
-
-
-<script>
-
-let escolhidos=[];
-
-const grid=document.getElementById("grid");
-
-for(let i=1;i<=1000;i++){
-
-let div=document.createElement("div");
-
-div.className="numero";
-
-div.innerText=i;
-
-div.onclick=function(){
-
-if(escolhidos.includes(i)){
-
-escolhidos=escolhidos.filter(n=>n!=i);
-
-div.classList.remove("selecionado");
-
-}else{
-
-escolhidos.push(i);
-
-div.classList.add("selecionado");
-
-}
-
-atualizar();
-
-};
-
-grid.appendChild(div);
-
-}
-
-
-function atualizar(){
-
-if(escolhidos.length==0){
-
-document.getElementById("numerosEscolhidos").innerText="Nenhum número selecionado";
-
-}else{
-
-document.getElementById("numerosEscolhidos").innerText=escolhidos.join(", ");
-
-}
-
-document.getElementById("valor").innerText=escolhidos.length*1;
-
-}
-
-
-function enviarWhats(){
-
-let nome=document.getElementById("nome").value;
-
-let telefone=document.getElementById("telefone").value;
-
-let numeros=escolhidos.join(", ");
-
-let valor=escolhidos.length;
-
-if(nome==""||telefone==""||numeros==""){
-
-alert("Preencha nome, telefone e escolha números");
-
-return;
-
-}
-
-let mensagem=`Olá, quero participar da rifa
-
-Nome: ${nome}
-Telefone: ${telefone}
-
-Números escolhidos: ${numeros}
-
-Valor a pagar: R$${valor}
-
-Vou realizar o pagamento no Pix.`;
-
-
-let url=`https://wa.me/5565999999999?text=${encodeURIComponent(mensagem)}`;
-
-window.open(url);
-
-}
-
-</script>
-
+<body class="bg-gradient-to-br from-zinc-950 to-zinc-900 text-white min-h-screen">
+    <div class="max-w-7xl mx-auto p-4">
+        <!-- HEADER -->
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-8 bg-zinc-900/80 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-zinc-800 gap-4">
+            <div>
+                <h1 class="text-4xl sm:text-5xl font-bold tracking-tighter text-emerald-400">RIFA 1 A 1000</h1>
+                <p class="text-zinc-300 text-lg mt-1">Prêmio: <strong>1 Caixa de Litrão</strong> • R$ 1,00 por número</p>
+            </div>
+            <div class="flex items-center gap-6">
+                <div onclick="toggleAdmin()" class="cursor-pointer px-6 py-3 sm:px-8 sm:py-4 bg-white text-zinc-900 hover:bg-emerald-400 hover:text-white font-bold rounded-2xl flex items-center gap-3 transition-all shadow-lg text-sm sm:text-base">
+                    <span id="adminBtnText">🔑 ADMIN</span>
+                </div>
+                <div class="text-right">
+                    <div class="text-xs text-zinc-500">VENDIDOS</div>
+                    <div id="soldCount" class="text-3xl sm:text-4xl font-bold text-emerald-400">0 / 1000</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- GRID -->
+            <div class="lg:col-span-8">
+                <div class="bg-zinc-900/80 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-zinc-800">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-semibold">Escolha seu número</h2>
+                        <div class="flex gap-6 text-sm">
+                            <div class="flex items-center gap-2"><div class="w-5 h-5 bg-emerald-500 rounded-full"></div> Disponível</div>
+                            <div class="flex items-center gap-2"><div class="w-5 h-5 bg-amber-500 rounded-full"></div> Reservado (15 min)</div>
+                            <div class="flex items-center gap-2"><div class="w-5 h-5 bg-slate-600 rounded-full"></div> Vendido</div>
+                        </div>
+                    </div>
+                    <div id="grid" class="grid-container grid grid-cols-10 sm:grid-cols-15 md:grid-cols-20 gap-2 max-h-[620px] overflow-y-auto p-4 bg-zinc-950 rounded-2xl border border-zinc-800"></div>
+                </div>
+            </div>
+
+            <!-- LATERAL -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- PIX -->
+                <div class="bg-gradient-to-br from-emerald-950/40 to-teal-950/40 rounded-3xl p-8 border border-emerald-700/40 shadow-xl">
+                    <h3 class="text-emerald-400 font-bold text-2xl mb-6">💰 Como reservar e pagar</h3>
+                    <div class="space-y-4">
+                        <p>1. Clique nos números verdes (pode vários)</p>
+                        <p>2. Reservado por 15 min para pagar R$1 cada</p>
+                        <div class="bg-zinc-900/70 rounded-2xl p-6 text-center border border-zinc-700">
+                            <p class="text-emerald-300 mb-4">QR Code / Chave Pix</p>
+                            <!-- Troque aqui -->
+                            <img src="https://i.imgur.com/SEU_QR_CODE_AQUI.png" alt="QR Pix" class="mx-auto w-48 h-48 rounded-xl border-4 border-emerald-500 mb-4">
+                            <div class="font-mono bg-zinc-800 p-4 rounded-xl break-all text-emerald-200">sua-chave-pix@example.com</div>
+                            <button onclick="navigator.clipboard.writeText('sua-chave-pix@example.com'); alert('Copiado!')" class="mt-4 bg-emerald-600 hover:bg-emerald-500 px-6 py-3 rounded-xl font-bold w-full">Copiar Chave</button>
+                        </div>
+                        <p>3. Envie comprovante no WhatsApp com nome, telefone e números</p>
+                        <a href="https://wa.me/5565999999999?text=Comprovante rifa" target="_blank" class="text-emerald-400 font-bold underline">Falar no WhatsApp</a>
+                    </div>
+                </div>
+
+                <!-- ADMIN -->
+                <div id="adminPanel" class="hidden bg-zinc-900/90 rounded-3xl p-8 border border-emerald-500/30">
+                    <div class="flex justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-emerald-400">Painel Admin</h2>
+                        <div onclick="logoutAdmin()" class="text-red-400 cursor-pointer">SAIR</div>
+                    </div>
+                    <input id="inputQuickAssign" type="text" placeholder="Ex: 1,5-10,47" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 mb-4 font-mono">
+                    <button onclick="quickAssign()" class="w-full bg-emerald-600 py-4 rounded-xl font-bold mb-4">Registrar Vendido</button>
+                    <button onclick="drawWinner()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 py-5 rounded-xl font-bold text-xl mb-4">🎉 SORTEAR AGORA</button>
+                    <div id="winnerBox" class="hidden bg-emerald-900/70 rounded-3xl p-6 text-center border border-emerald-400">
+                        <div class="text-emerald-200 mb-2">🏆 GANHADOR</div>
+                        <div id="winnerName" class="text-3xl font-bold"></div>
+                        <div id="winnerPhone" class="text-2xl font-mono mt-2"></div>
+                    </div>
+                    <button onclick="resetAll()" class="w-full py-4 text-red-400 border border-red-400 rounded-xl mt-4">🚨 Reiniciar Tudo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Compat Init
+        const firebaseConfig = {
+            apiKey: "AIzaSyBiLA8fXkHgfATiyhmVqsW2JcmwCPBdUYI",
+            authDomain: "rifa-1000-2275c.firebaseapp.com",
+            databaseURL: "https://rifa-1000-2275c-default-rtdb.firebaseio.com/",
+            projectId: "rifa-1000-2275c",
+            storageBucket: "rifa-1000-2275c.firebasestorage.app",
+            messagingSenderId: "821868343657",
+            appId: "1:821868343657:web:e6f0173646f3f8c6b68df8"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const numbersRef = db.ref('numbers');
+
+        const ADMIN_PASSWORD = "123456";
+        let adminMode = false;
+        let numbers = [];
+        let selected = new Set();
+        const RESERVATION_TIME = 15 * 60 * 1000;
+
+        function getUserId() {
+            let id = localStorage.getItem('rifaUserId');
+            if (!id) {
+                id = 'user_' + Date.now() + Math.random().toString(36).slice(2);
+                localStorage.setItem('rifaUserId', id);
+            }
+            return id;
+        }
+
+        numbersRef.on('value', (snapshot) => {
+            let data = snapshot.val();
+            if (!data || data.length !== 1000) {
+                numbers = Array.from({length: 1000}, (_, i) => ({num: i+1, name: "", phone: "", reservedUntil: null, reservedBy: null}));
+                numbersRef.set(numbers);
+            } else {
+                numbers = data;
+            }
+            const now = Date.now();
+            numbers.forEach(n => {
+                if (n.reservedUntil && n.reservedUntil < now) {
+                    n.reservedUntil = null;
+                    n.reservedBy = null;
+                }
+            });
+            renderGrid();
+        }, (error) => {
+            console.error("Erro Firebase:", error);
+            alert("Erro ao conectar com o banco de dados. Verifique o console.");
+        });
+
+        function renderGrid() {
+            const grid = document.getElementById("grid");
+            grid.innerHTML = "";
+            const now = Date.now();
+            numbers.forEach((entry, index) => {
+                const i = index + 1;
+                let cls = "available";
+                if (entry.name) cls = "sold";
+                else if (entry.reservedUntil && entry.reservedUntil > now) cls = "reserved";
+
+                const div = document.createElement("div");
+                div.className = `number w-10 h-10 flex items-center justify-center text-base font-bold rounded-2xl cursor-pointer select-none ${cls} ${selected.has(i) ? "selected" : ""}`;
+                div.textContent = i;
+                if (!entry.name) div.onclick = () => toggleSelect(i);
+                grid.appendChild(div);
+            });
+            document.getElementById("soldCount").textContent = `${numbers.filter(n => n.name).length} / 1000`;
+        }
+
+        function toggleSelect(num) {
+            const entry = numbers[num - 1];
+            const now = Date.now();
+            const uid = getUserId();
+
+            if (entry.name) return alert("Já vendido!");
+
+            if (entry.reservedUntil && entry.reservedUntil > now) {
+                if (entry.reservedBy === uid) {
+                    entry.reservedUntil = null;
+                    entry.reservedBy = null;
+                    selected.delete(num);
+                } else {
+                    return alert("Reservado por outra pessoa!");
+                }
+            } else {
+                entry.reservedUntil = now + RESERVATION_TIME;
+                entry.reservedBy = uid;
+                selected.add(num);
+            }
+            numbersRef.set(numbers);
+        }
+
+        function quickAssign() {
+            if (!adminMode) return alert("Apenas admin!");
+            const input = document.getElementById("inputQuickAssign").value.trim();
+            if (!input) return;
+            const nums = [];
+            input.split(/[, ]+/).forEach(p => {
+                if (p.includes('-')) {
+                    const [s, e] = p.split('-').map(Number);
+                    for (let j = Math.min(s,e); j <= Math.max(s,e); j++) nums.push(j);
+                } else nums.push(Number(p));
+            });
+            const uniqueNums = [...new Set(nums.filter(n => !isNaN(n) && n >= 1 && n <= 1000))];
+            if (uniqueNums.length === 0) return alert("Nenhum número válido!");
+
+            const name = prompt("Nome:");
+            if (!name) return;
+            const phone = prompt("Telefone:") || "";
+
+            uniqueNums.forEach(n => {
+                const entry = numbers[n-1];
+                entry.name = name;
+                entry.phone = phone;
+                entry.reservedUntil = null;
+                entry.reservedBy = null;
+            });
+            numbersRef.set(numbers);
+            alert(`OK! ${uniqueNums.length} números registrados.`);
+            document.getElementById("inputQuickAssign").value = "";
+        }
+
+        function drawWinner() {
+            const sold = numbers.filter(n => n.name);
+            if (!sold.length) return alert("Nenhum vendido!");
+            const w = sold[Math.floor(Math.random() * sold.length)];
+            document.getElementById("winnerName").textContent = w.name;
+            document.getElementById("winnerPhone").textContent = w.phone || "—";
+            document.getElementById("winnerBox").classList.remove("hidden");
+        }
+
+        function resetAll() {
+            if (!confirm("Apagar tudo?")) return;
+            numbers.forEach(n => { n.name = ""; n.phone = ""; n.reservedUntil = null; n.reservedBy = null; });
+            numbersRef.set(numbers);
+            alert("Reiniciado!");
+        }
+
+        function toggleAdmin() {
+            if (adminMode) {
+                if (confirm("Sair?")) {
+                    adminMode = false;
+                    document.getElementById("adminPanel").classList.add("hidden");
+                    document.getElementById("adminBtnText").textContent = "🔑 ADMIN";
+                }
+                return;
+            }
+            const pass = prompt("Senha:");
+            if (pass === ADMIN_PASSWORD) {
+                adminMode = true;
+                document.getElementById("adminPanel").classList.remove("hidden");
+                document.getElementById("adminBtnText").innerHTML = "✅ ADMIN";
+            } else if (pass) alert("Errada!");
+        }
+
+        function logoutAdmin() { toggleAdmin(); } // alias
+
+        window.onload = () => {
+            console.log("Rifa carregada - aguardando Firebase...");
+        };
+    </script>
 </body>
 </html>
