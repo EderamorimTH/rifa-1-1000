@@ -6,29 +6,9 @@
     <title>Rifa 1 a 1000 - Caixa de Litrão</title>
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Firebase SDK Modular -->
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-      import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyBiLA8fXkHgfATiyhmVqsW2JcmwCPBdUYI",
-        authDomain: "rifa-1000-2275c.firebaseapp.com",
-        databaseURL: "https://rifa-1000-2275c-default-rtdb.firebaseio.com/",  // Verifique no console se for .firebasedatabase.app
-        projectId: "rifa-1000-2275c",
-        storageBucket: "rifa-1000-2275c.firebasestorage.app",
-        messagingSenderId: "821868343657",
-        appId: "1:821868343657:web:e6f0173646f3f8c6b68df8"
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const db = getDatabase(app);
-
-      window.db = db;
-      window.dbRef = ref;
-      window.dbSet = set;
-      window.dbOnValue = onValue;
-    </script>
+    <!-- Firebase Compat Mode (mais simples, evita erros de ref/dbRef) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-database-compat.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
@@ -41,8 +21,6 @@
         .selected { box-shadow: 0 0 0 6px #3b82f6; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
         .grid-container { scrollbar-width: thin; scrollbar-color: #10b981 #f1f5f9; }
-        .modal { animation: modalPop 0.3s ease-out forwards; }
-        @keyframes modalPop { 0% { transform: scale(0.7); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body class="bg-gradient-to-br from-zinc-950 to-zinc-900 text-white min-h-screen">
@@ -67,80 +45,79 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- GRID -->
             <div class="lg:col-span-8">
-                <div class="bg-zinc-900/80 backdrop-blur-xl rounded-3xl p-5 sm:p-6 shadow-2xl border border-zinc-800">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 px-2 gap-4">
+                <div class="bg-zinc-900/80 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-zinc-800">
+                    <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-semibold">Escolha seu número</h2>
-                        <div class="flex flex-wrap gap-4 text-sm">
-                            <div class="flex items-center gap-2"><div class="w-5 h-5 bg-emerald-500 rounded-full"></div><span class="text-emerald-400">Disponível</span></div>
-                            <div class="flex items-center gap-2"><div class="w-5 h-5 bg-amber-500 rounded-full"></div><span class="text-amber-300">Reservado (15 min)</span></div>
-                            <div class="flex items-center gap-2"><div class="w-5 h-5 bg-slate-600 rounded-full"></div><span class="text-slate-400">Vendido</span></div>
+                        <div class="flex gap-6 text-sm">
+                            <div class="flex items-center gap-2"><div class="w-5 h-5 bg-emerald-500 rounded-full"></div> Disponível</div>
+                            <div class="flex items-center gap-2"><div class="w-5 h-5 bg-amber-500 rounded-full"></div> Reservado (15 min)</div>
+                            <div class="flex items-center gap-2"><div class="w-5 h-5 bg-slate-600 rounded-full"></div> Vendido</div>
                         </div>
                     </div>
                     <div id="grid" class="grid-container grid grid-cols-10 sm:grid-cols-15 md:grid-cols-20 gap-2 max-h-[620px] overflow-y-auto p-4 bg-zinc-950 rounded-2xl border border-zinc-800"></div>
                 </div>
             </div>
 
-            <!-- COLUNA LATERAL -->
+            <!-- LATERAL -->
             <div class="lg:col-span-4 space-y-6">
-                <!-- COMO PAGAR PIX (substitua QR e chave) -->
-                <div class="bg-gradient-to-br from-emerald-950/40 to-teal-950/40 rounded-3xl p-6 border border-emerald-700/40 shadow-xl">
-                    <h3 class="text-emerald-400 font-bold text-xl mb-6 flex items-center gap-3">💰 Como reservar e pagar</h3>
-                    <div class="space-y-4 text-zinc-200">
-                        <p><strong>1.</strong> Clique nos números verdes (pode selecionar vários)</p>
-                        <p><strong>2.</strong> Número reservado por 15 min para você pagar R$1 cada</p>
-                        <div class="bg-zinc-900/70 rounded-2xl p-5 text-center border border-zinc-700">
-                            <p class="text-emerald-300 font-semibold mb-3">QR Code / Chave Pix</p>
-                            <img src="https://i.imgur.com/SEU_QR_CODE_AQUI.png" alt="QR Code Pix" class="mx-auto w-48 h-48 object-contain rounded-xl border-4 border-emerald-500 mb-4">
-                            <div class="font-mono bg-zinc-800 p-3 rounded-xl break-all text-emerald-200">sua-chave-pix@example.com</div>
-                            <button onclick="navigator.clipboard.writeText('sua-chave-pix@example.com'); alert('Copiado!')" class="mt-4 bg-emerald-600 hover:bg-emerald-500 px-6 py-3 rounded-xl font-bold text-white w-full">Copiar Chave</button>
+                <!-- PIX -->
+                <div class="bg-gradient-to-br from-emerald-950/40 to-teal-950/40 rounded-3xl p-8 border border-emerald-700/40 shadow-xl">
+                    <h3 class="text-emerald-400 font-bold text-2xl mb-6">💰 Como reservar e pagar</h3>
+                    <div class="space-y-4">
+                        <p>1. Clique nos números verdes (pode vários)</p>
+                        <p>2. Reservado por 15 min para pagar R$1 cada</p>
+                        <div class="bg-zinc-900/70 rounded-2xl p-6 text-center border border-zinc-700">
+                            <p class="text-emerald-300 mb-4">QR Code / Chave Pix</p>
+                            <!-- Troque aqui -->
+                            <img src="https://i.imgur.com/SEU_QR_CODE_AQUI.png" alt="QR Pix" class="mx-auto w-48 h-48 rounded-xl border-4 border-emerald-500 mb-4">
+                            <div class="font-mono bg-zinc-800 p-4 rounded-xl break-all text-emerald-200">sua-chave-pix@example.com</div>
+                            <button onclick="navigator.clipboard.writeText('sua-chave-pix@example.com'); alert('Copiado!')" class="mt-4 bg-emerald-600 hover:bg-emerald-500 px-6 py-3 rounded-xl font-bold w-full">Copiar Chave</button>
                         </div>
-                        <p><strong>3.</strong> Envie comprovante no WhatsApp com nome, telefone e números</p>
-                        <a href="https://wa.me/5565999999999?text=Comprovante%20rifa" target="_blank" class="text-emerald-400 font-bold">wa.me/5565999999999</a>
+                        <p>3. Envie comprovante no WhatsApp com nome, telefone e números</p>
+                        <a href="https://wa.me/5565999999999?text=Comprovante rifa" target="_blank" class="text-emerald-400 font-bold underline">Falar no WhatsApp</a>
                     </div>
                 </div>
 
-                <!-- PAINEL ADMIN -->
-                <div id="adminPanel" class="hidden bg-zinc-900/90 rounded-3xl p-6 border border-emerald-500/30">
+                <!-- ADMIN -->
+                <div id="adminPanel" class="hidden bg-zinc-900/90 rounded-3xl p-8 border border-emerald-500/30">
                     <div class="flex justify-between mb-6">
                         <h2 class="text-2xl font-bold text-emerald-400">Painel Admin</h2>
                         <div onclick="logoutAdmin()" class="text-red-400 cursor-pointer">SAIR</div>
                     </div>
-                    <div class="space-y-4">
-                        <input id="inputQuickAssign" type="text" placeholder="Ex: 47, 100-105" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 font-mono">
-                        <button onclick="quickAssign()" class="w-full bg-emerald-600 py-4 rounded-xl font-bold">Registrar como Vendido</button>
-                        <button onclick="drawWinner()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 py-5 rounded-xl font-bold text-xl">🎉 SORTEAR</button>
-                        <div id="winnerBox" class="hidden bg-emerald-900/70 rounded-2xl p-6 text-center">
-                            <div class="text-emerald-200">🏆 Vencedor</div>
-                            <div id="winnerName" class="text-2xl font-bold"></div>
-                            <div id="winnerPhone" class="text-xl"></div>
-                        </div>
-                        <button onclick="resetAll()" class="w-full py-3 text-red-400 border border-red-500 rounded-xl">Reiniciar Rifa</button>
+                    <input id="inputQuickAssign" type="text" placeholder="Ex: 1,5-10,47" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 mb-4 font-mono">
+                    <button onclick="quickAssign()" class="w-full bg-emerald-600 py-4 rounded-xl font-bold mb-4">Registrar Vendido</button>
+                    <button onclick="drawWinner()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 py-5 rounded-xl font-bold text-xl mb-4">🎉 SORTEAR AGORA</button>
+                    <div id="winnerBox" class="hidden bg-emerald-900/70 rounded-3xl p-6 text-center border border-emerald-400">
+                        <div class="text-emerald-200 mb-2">🏆 GANHADOR</div>
+                        <div id="winnerName" class="text-3xl font-bold"></div>
+                        <div id="winnerPhone" class="text-2xl font-mono mt-2"></div>
                     </div>
+                    <button onclick="resetAll()" class="w-full py-4 text-red-400 border border-red-400 rounded-xl mt-4">🚨 Reiniciar Tudo</button>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL (para atribuição manual na grade, opcional) -->
-    <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-        <div class="bg-zinc-900 rounded-3xl p-8 max-w-md w-full border border-zinc-700">
-            <h3 class="text-2xl mb-6">Atribuir selecionados</h3>
-            <input id="inputName" type="text" placeholder="Nome completo" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-5 py-3 mb-4">
-            <input id="inputPhone" type="tel" maxlength="11" placeholder="Telefone com DDD" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-5 py-3 mb-6 font-mono">
-            <div class="flex gap-3">
-                <button onclick="hideModal()" class="flex-1 py-4 border rounded-xl">Cancelar</button>
-                <button onclick="saveAssignment()" class="flex-1 py-4 bg-emerald-600 rounded-xl font-bold">Salvar</button>
             </div>
         </div>
     </div>
 
     <script>
-        const ADMIN_PASSWORD = "123456"; // Mude aqui
+        // Firebase Compat Init
+        const firebaseConfig = {
+            apiKey: "AIzaSyBiLA8fXkHgfATiyhmVqsW2JcmwCPBdUYI",
+            authDomain: "rifa-1000-2275c.firebaseapp.com",
+            databaseURL: "https://rifa-1000-2275c-default-rtdb.firebaseio.com/",
+            projectId: "rifa-1000-2275c",
+            storageBucket: "rifa-1000-2275c.firebasestorage.app",
+            messagingSenderId: "821868343657",
+            appId: "1:821868343657:web:e6f0173646f3f8c6b68df8"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const numbersRef = db.ref('numbers');
+
+        const ADMIN_PASSWORD = "123456";
         let adminMode = false;
         let numbers = [];
         let selected = new Set();
         const RESERVATION_TIME = 15 * 60 * 1000;
-        const numbersRef = dbRef(db, 'numbers');
 
         function getUserId() {
             let id = localStorage.getItem('rifaUserId');
@@ -151,40 +128,33 @@
             return id;
         }
 
-        function loadAndListen() {
-            dbOnValue(numbersRef, (snapshot) => {
-                let data = snapshot.val();
-                if (!data || !Array.isArray(data) || data.length !== 1000) {
-                    numbers = Array.from({length: 1000}, (_, i) => ({
-                        num: i + 1, name: "", phone: "", reservedUntil: null, reservedBy: null
-                    }));
-                    dbSet(numbersRef, numbers);
-                } else {
-                    numbers = data;
+        numbersRef.on('value', (snapshot) => {
+            let data = snapshot.val();
+            if (!data || data.length !== 1000) {
+                numbers = Array.from({length: 1000}, (_, i) => ({num: i+1, name: "", phone: "", reservedUntil: null, reservedBy: null}));
+                numbersRef.set(numbers);
+            } else {
+                numbers = data;
+            }
+            const now = Date.now();
+            numbers.forEach(n => {
+                if (n.reservedUntil && n.reservedUntil < now) {
+                    n.reservedUntil = null;
+                    n.reservedBy = null;
                 }
-                // Limpa expirados localmente para render
-                const now = Date.now();
-                numbers.forEach(n => {
-                    if (n.reservedUntil && n.reservedUntil < now) {
-                        n.reservedUntil = null;
-                        n.reservedBy = null;
-                    }
-                });
-                renderGrid();
             });
-        }
-
-        function saveData() {
-            dbSet(numbersRef, numbers).catch(err => console.error("Erro Firebase:", err));
-        }
+            renderGrid();
+        }, (error) => {
+            console.error("Erro Firebase:", error);
+            alert("Erro ao conectar com o banco de dados. Verifique o console.");
+        });
 
         function renderGrid() {
             const grid = document.getElementById("grid");
             grid.innerHTML = "";
             const now = Date.now();
-
-            for (let i = 1; i <= 1000; i++) {
-                const entry = numbers[i-1] || {};
+            numbers.forEach((entry, index) => {
+                const i = index + 1;
                 let cls = "available";
                 if (entry.name) cls = "sold";
                 else if (entry.reservedUntil && entry.reservedUntil > now) cls = "reserved";
@@ -192,25 +162,21 @@
                 const div = document.createElement("div");
                 div.className = `number w-10 h-10 flex items-center justify-center text-base font-bold rounded-2xl cursor-pointer select-none ${cls} ${selected.has(i) ? "selected" : ""}`;
                 div.textContent = i;
-
-                if (!entry.name) {
-                    div.onclick = () => toggleSelect(i);
-                }
+                if (!entry.name) div.onclick = () => toggleSelect(i);
                 grid.appendChild(div);
-            }
+            });
             document.getElementById("soldCount").textContent = `${numbers.filter(n => n.name).length} / 1000`;
         }
 
         function toggleSelect(num) {
-            const entry = numbers[num-1];
+            const entry = numbers[num - 1];
             const now = Date.now();
-            const userId = getUserId();
+            const uid = getUserId();
 
             if (entry.name) return alert("Já vendido!");
 
             if (entry.reservedUntil && entry.reservedUntil > now) {
-                if (entry.reservedBy === userId) {
-                    // Desmarca se for do mesmo usuário
+                if (entry.reservedBy === uid) {
                     entry.reservedUntil = null;
                     entry.reservedBy = null;
                     selected.delete(num);
@@ -219,94 +185,80 @@
                 }
             } else {
                 entry.reservedUntil = now + RESERVATION_TIME;
-                entry.reservedBy = userId;
+                entry.reservedBy = uid;
                 selected.add(num);
             }
-
-            saveData();
-            renderGrid();
+            numbersRef.set(numbers);
         }
 
         function quickAssign() {
             if (!adminMode) return alert("Apenas admin!");
             const input = document.getElementById("inputQuickAssign").value.trim();
-            if (!input) return alert("Digite números!");
+            if (!input) return;
+            const nums = [];
+            input.split(/[, ]+/).forEach(p => {
+                if (p.includes('-')) {
+                    const [s, e] = p.split('-').map(Number);
+                    for (let j = Math.min(s,e); j <= Math.max(s,e); j++) nums.push(j);
+                } else nums.push(Number(p));
+            });
+            const uniqueNums = [...new Set(nums.filter(n => !isNaN(n) && n >= 1 && n <= 1000))];
+            if (uniqueNums.length === 0) return alert("Nenhum número válido!");
 
-            const nums = parseNumbers(input);
-            if (nums.length === 0) return alert("Nenhum número válido!");
-
-            const name = prompt("Nome completo:");
+            const name = prompt("Nome:");
             if (!name) return;
-            const phone = prompt("Telefone (DDD):") || "";
+            const phone = prompt("Telefone:") || "";
 
-            nums.forEach(n => {
-                if (n >= 1 && n <= 1000) {
-                    const entry = numbers[n-1];
-                    entry.name = name;
-                    entry.phone = phone;
-                    entry.reservedUntil = null;
-                    entry.reservedBy = null;
-                }
+            uniqueNums.forEach(n => {
+                const entry = numbers[n-1];
+                entry.name = name;
+                entry.phone = phone;
+                entry.reservedUntil = null;
+                entry.reservedBy = null;
             });
-            saveData();
-            alert(`Registrados ${nums.length} números!`);
+            numbersRef.set(numbers);
+            alert(`OK! ${uniqueNums.length} números registrados.`);
             document.getElementById("inputQuickAssign").value = "";
-        }
-
-        function parseNumbers(str) {
-            const res = [];
-            str.split(/[,;\s]+/).forEach(part => {
-                if (part.includes('-')) {
-                    const [s, e] = part.split('-').map(Number);
-                    if (!isNaN(s) && !isNaN(e)) for (let i = Math.min(s,e); i <= Math.max(s,e); i++) res.push(i);
-                } else {
-                    const n = Number(part);
-                    if (!isNaN(n)) res.push(n);
-                }
-            });
-            return [...new Set(res)];
         }
 
         function drawWinner() {
             const sold = numbers.filter(n => n.name);
-            if (sold.length === 0) return alert("Nenhum vendido!");
-            const winner = sold[Math.floor(Math.random() * sold.length)];
-            document.getElementById("winnerName").textContent = winner.name;
-            document.getElementById("winnerPhone").textContent = winner.phone || "—";
+            if (!sold.length) return alert("Nenhum vendido!");
+            const w = sold[Math.floor(Math.random() * sold.length)];
+            document.getElementById("winnerName").textContent = w.name;
+            document.getElementById("winnerPhone").textContent = w.phone || "—";
             document.getElementById("winnerBox").classList.remove("hidden");
         }
 
         function resetAll() {
-            if (!confirm("Apagar TODA a rifa?")) return;
+            if (!confirm("Apagar tudo?")) return;
             numbers.forEach(n => { n.name = ""; n.phone = ""; n.reservedUntil = null; n.reservedBy = null; });
-            saveData();
-            alert("Rifa reiniciada!");
+            numbersRef.set(numbers);
+            alert("Reiniciado!");
         }
 
         function toggleAdmin() {
-            if (adminMode) return logoutAdmin();
-            const pass = prompt("Senha admin:");
+            if (adminMode) {
+                if (confirm("Sair?")) {
+                    adminMode = false;
+                    document.getElementById("adminPanel").classList.add("hidden");
+                    document.getElementById("adminBtnText").textContent = "🔑 ADMIN";
+                }
+                return;
+            }
+            const pass = prompt("Senha:");
             if (pass === ADMIN_PASSWORD) {
                 adminMode = true;
                 document.getElementById("adminPanel").classList.remove("hidden");
-                document.getElementById("adminBtnText").innerHTML = "✅ ADMIN ATIVO";
-            } else if (pass) alert("Senha errada!");
+                document.getElementById("adminBtnText").innerHTML = "✅ ADMIN";
+            } else if (pass) alert("Errada!");
         }
 
-        function logoutAdmin() {
-            adminMode = false;
-            document.getElementById("adminPanel").classList.add("hidden");
-            document.getElementById("adminBtnText").textContent = "🔑 ADMIN";
-        }
+        function logoutAdmin() { toggleAdmin(); } // alias
 
-        function showAssignModal() { /* opcional, pode remover se não usar */ }
-        function hideModal() { document.getElementById("modal").classList.add("hidden"); }
-        function saveAssignment() { /* opcional */ }
-
-        function init() {
-            loadAndListen();
-        }
-        window.onload = init;
+        window.onload = () => {
+            console.log("Rifa carregada - aguardando Firebase...");
+        };
     </script>
 </body>
 </html>
