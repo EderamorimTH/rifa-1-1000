@@ -73,7 +73,11 @@
                         <div id="selectedNumbers" class="bg-zinc-900/70 rounded-2xl p-6 text-center border border-zinc-700">
                             <p class="text-emerald-300 mb-4">Números selecionados:</p>
                             <div id="selectedList" class="font-mono mb-4"></div>
-                            <div id="totalPay" class="font-bold text-xl"></div>
+                            <div id="totalPay" class="font-bold text-xl mb-4"></div>
+                            <div class="space-y-2">
+                                <input id="userName" type="text" placeholder="Seu Nome" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 font-mono">
+                                <input id="userPhone" type="text" placeholder="Seu Telefone" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 font-mono">
+                            </div>
                         </div>
                         <button onclick="showPix()" class="bg-emerald-600 hover:bg-emerald-500 px-6 py-3 rounded-xl font-bold w-full">Pagar com Pix</button>
                         <div id="pixInfo" class="hidden bg-zinc-900/70 rounded-2xl p-6 text-center border border-zinc-700 mt-4">
@@ -84,7 +88,7 @@
                             <button onclick="navigator.clipboard.writeText('sua-chave-pix@example.com'); alert('Copiado!')" class="mt-4 bg-emerald-600 hover:bg-emerald-500 px-6 py-3 rounded-xl font-bold w-full">Copiar Chave</button>
                         </div>
                         <p>3. Envie comprovante no WhatsApp com nome, telefone e números</p>
-                        <a href="https://wa.me/5565999999999?text=Comprovante rifa" target="_blank" class="text-emerald-400 font-bold underline">Falar no WhatsApp</a>
+                        <a id="whatsappLink" href="https://wa.me/5565999999999?text=Comprovante%20rifa" target="_blank" class="text-emerald-400 font-bold underline">Falar no WhatsApp</a>
                     </div>
                 </div>
 
@@ -128,6 +132,7 @@
         let numbers = [];
         let selected = new Set();
         const RESERVATION_TIME = 15 * 60 * 1000;
+        let userId = getUserId();
 
         function getUserId() {
             let id = localStorage.getItem('rifaUserId');
@@ -153,6 +158,7 @@
                     n.reservedBy = null;
                 }
             });
+            selected = new Set(numbers.filter(n => n.reservedBy === userId).map((n, index) => index + 1));
             renderGrid();
             updateSelectedInfo();
         }, (error) => {
@@ -208,15 +214,33 @@
             document.getElementById("selectedList").textContent = list || "Nenhum selecionado";
             const total = selected.size;
             document.getElementById("totalPay").textContent = total > 0 ? `Total a pagar: R$${total},00` : "";
+            updateWhatsAppLink();
+        }
+
+        function updateWhatsAppLink() {
+            const name = document.getElementById("userName").value.trim();
+            const phone = document.getElementById("userPhone").value.trim();
+            const nums = Array.from(selected).sort((a,b) => a-b).join(", ");
+            let text = "Comprovante rifa";
+            if (nums) text += `\nNúmeros: ${nums}`;
+            if (name) text += `\nNome: ${name}`;
+            if (phone) text += `\nTelefone: ${phone}`;
+            const encoded = encodeURIComponent(text);
+            document.getElementById("whatsappLink").href = `https://wa.me/5565999731992?text=${encoded}`;
         }
 
         function showPix() {
             if (selected.size === 0) return alert("Selecione números primeiro!");
+            const name = document.getElementById("userName").value.trim();
+            const phone = document.getElementById("userPhone").value.trim();
+            if (!name || !phone) {
+                alert("Por favor, preencha seu nome e telefone para facilitar o envio do comprovante.");
+            }
             document.getElementById("pixInfo").classList.remove("hidden");
         }
 
         function selectRandom(count) {
-            const available = numbers.filter(n => !n.name && !n.reservedUntil).map(n => n.num);
+            const available = numbers.filter(n => !n.name && !n.reservedUntil).map((_, index) => index + 1);
             if (available.length < count) return alert("Não há números suficientes disponíveis!");
             const shuffled = available.sort(() => 0.5 - Math.random());
             const chosen = shuffled.slice(0, count);
@@ -290,6 +314,16 @@
 
         window.onload = () => {
             console.log("Rifa carregada - aguardando Firebase...");
+            document.getElementById("userName").value = localStorage.getItem('rifaName') || '';
+            document.getElementById("userPhone").value = localStorage.getItem('rifaPhone') || '';
+            document.getElementById("userName").oninput = () => {
+                localStorage.setItem('rifaName', document.getElementById("userName").value);
+                updateWhatsAppLink();
+            };
+            document.getElementById("userPhone").oninput = () => {
+                localStorage.setItem('rifaPhone', document.getElementById("userPhone").value);
+                updateWhatsAppLink();
+            };
         };
     </script>
 </body>
